@@ -61,14 +61,19 @@ def fitness(gens: list) -> int:
 
 
 def mutation(chromosome: Chromosome):
+    """This function will change one of the gens. If a gen frequent more than one time, It will change to
+    another gen. Otherwise, randomly select a gen and sets a new gen.
+    """
     frequency = dict(Counter(chromosome.gens))
     _max = max(frequency.values())
     index = random.randrange(0, QUEENS)
+    new_gen = random.randrange(0, QUEENS)
     if _max > 1:
         for k, v in frequency.items():
             if v == _max:
                 index = chromosome.gens.index(k)
-    chromosome.gens[index] = random.randrange(0, QUEENS)
+                new_gen = (set(range(QUEENS)) - set(chromosome.gens)).pop()
+    chromosome.gens[index] = new_gen
     chromosome.value = fitness(chromosome.gens)
 
 
@@ -93,7 +98,7 @@ def select_parents(population: list) -> list:
 def main():
     population = initialize_population(10)
     population.sort(key=lambda x: x.value)
-    for i in range(30000):
+    for i in range(ITERATION):
         population = select_parents(population)
         children = [crossover(population[j - 1], population[j]) for j in range(1, len(population), 2)]
         for j, child in enumerate(children):
@@ -113,6 +118,7 @@ def main():
 
 
 if __name__ == '__main__':
+    ITERATION = 30_000
     QUEENS = 10
     logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
     log = logging.getLogger(__name__)
